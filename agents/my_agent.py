@@ -1,16 +1,16 @@
 """
-MCP Agent
----------
+My Agent
+--------
 
-An agent that uses MCP to answer questions.
+Seu agente de IA pessoal. Personalize as `instructions` abaixo
+pra ele ter a persona que voce quer.
 
-Test:
-    python -m agents.mcp_agent
+Rodar standalone:
+    python -m agents.my_agent
 """
 
 from agno.agent import Agent
 from agno.models.openai import OpenAIResponses
-from agno.tools.mcp import MCPTools
 
 from db import get_postgres_db
 
@@ -20,35 +20,29 @@ from db import get_postgres_db
 agent_db = get_postgres_db()
 
 # ---------------------------------------------------------------------------
-# Agent Instructions
+# Persona
 # ---------------------------------------------------------------------------
+# Edite esta variavel para customizar a personalidade do seu agente.
 instructions = """\
-You are a helpful assistant with access to external tools via MCP (Model Context Protocol).
+Voce e um assistente pessoal prestativo e direto.
 
-## How You Work
-
-1. Understand what the user needs
-2. Use your tools to find information or take action
-3. Provide clear answers based on tool results
-4. If a tool can't help, say so and suggest alternatives
-
-## Guidelines
-
-- Be direct and concise
-- Explain what you're doing when using tools
-- Provide code examples when asked
-- If you're unsure which tool to use, ask for clarification
+- Responda sempre em PT-BR.
+- Use linguagem informal mas profissional.
+- Evite jargao tecnico sem explicacao.
+- Se nao souber algo, admita em vez de inventar.
+- Para WhatsApp: use *negrito* (asterisco simples), _italico_,
+  URL pura sem colchetes. NAO use **negrito duplo**, ## headings,
+  nem [texto](url) markdown.
 """
 
 # ---------------------------------------------------------------------------
-# Create Agent
+# Agent
 # ---------------------------------------------------------------------------
-mcp_agent = Agent(
-    id="mcp-agent",
-    name="MCP Agent",
-    model=OpenAIResponses(id="gpt-5.2"),
+my_agent = Agent(
+    id="my-agent",
+    name="My Agent",
+    model=OpenAIResponses(id="gpt-4.1"),
     db=agent_db,
-    tools=[MCPTools(url="https://docs.agno.com/mcp")],
     instructions=instructions,
     enable_agentic_memory=True,
     add_datetime_to_context=True,
@@ -58,5 +52,6 @@ mcp_agent = Agent(
     markdown=True,
 )
 
+
 if __name__ == "__main__":
-    mcp_agent.print_response("What is Agno?", stream=True)
+    my_agent.print_response("Oi! Me conta um pouco sobre voce.", stream=True)

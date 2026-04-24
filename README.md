@@ -1,215 +1,161 @@
-# AgentOS Railway Template
+# agno-whatsapp-starter
 
-Deploy a multi-agent system on Railway.
+Template plug-and-play pra subir **um agente de IA que atende no WhatsApp Meta oficial**, com suporte a texto, áudio, imagem e documentos.
 
-## What's Included
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy?template=https://github.com/dandgsf/agno-whatsapp-starter)
 
-| Agent | Pattern | Description |
-|-------|---------|-------------|
-| Knowledge Agent | Agentic RAG | Answers questions from a knowledge base. |
-| MCP Agent | MCP Tool Use | Connects to external services via MCP. |
-
-## Get Started
-
-```sh
-# Clone the repo
-git clone https://github.com/agno-agi/agentos-railway-template.git agentos-railway
-cd agentos-railway
-
-# Add OPENAI_API_KEY
-cp example.env .env
-# Edit .env and add your key
-
-# Start the application
-docker compose up -d --build
-
-# Load documents for the knowledge agent
-docker exec -it agentos-api python -m agents.knowledge_agent
-```
-
-Confirm AgentOS is running at [http://localhost:8000/docs](http://localhost:8000/docs).
-
-### Connect to the Web UI
-
-1. Open [os.agno.com](https://os.agno.com) and login
-2. Add OS → Local → `http://localhost:8000`
-3. Click "Connect"
-
-## Deploy to Railway
-
-Requires:
-- [Railway CLI](https://docs.railway.com/guides/cli)
-- `OPENAI_API_KEY` set in your environment
-
-```sh
-railway login
-
-./scripts/railway_up.sh
-```
-
-The script provisions PostgreSQL, configures environment variables, and deploys your application.
-
-### Connect to the Web UI
-
-1. Open [os.agno.com](https://os.agno.com)
-2. Click "Add OS" → "Live"
-3. Enter your Railway domain
-
-### Manage deployment
-
-```sh
-railway logs --service agent-os      # View logs
-railway open                         # Open dashboard
-railway up --service agent-os -d     # Update after changes
-```
-
-To stop services:
-```sh
-railway down --service agent-os
-railway down --service pgvector
-```
-
-## The Agents
-
-### Knowledge Agent
-
-Answers questions using hybrid search over a vector database (Agentic RAG).
-
-**Load documents:**
-
-```sh
-# Local
-docker exec -it agentos-api python -m agents.knowledge_agent
-
-# Railway
-railway run python -m agents.knowledge_agent
-```
-
-**Try it:**
-
-```
-What is Agno?
-How do I create my first agent?
-What documents are in your knowledge base?
-```
-
-### MCP Agent
-
-Connects to external tools via the Model Context Protocol.
-
-**Try it:**
-
-```
-What tools do you have access to?
-Search the docs for how to use LearningMachine
-Find examples of agents with memory
-```
-
-## Common Tasks
-
-### Add your own agent
-
-1. Create `agents/my_agent.py`:
-
-```python
-from agno.agent import Agent
-from agno.models.openai import OpenAIResponses
-from db import get_postgres_db
-
-my_agent = Agent(
-    id="my-agent",
-    name="My Agent",
-    model=OpenAIResponses(id="gpt-5.2"),
-    db=get_postgres_db(),
-    instructions="You are a helpful assistant.",
-)
-```
-
-2. Register in `app/main.py`:
-
-```python
-from agents.my_agent import my_agent
-
-agent_os = AgentOS(
-    name="AgentOS",
-    agents=[knowledge_agent, mcp_agent, my_agent],
-    ...
-)
-```
-
-3. Restart: `docker compose restart`
-
-### Add tools to an agent
-
-Agno includes 100+ tool integrations. See the [full list](https://docs.agno.com/tools/toolkits).
-
-```python
-from agno.tools.slack import SlackTools
-from agno.tools.google_calendar import GoogleCalendarTools
-
-my_agent = Agent(
-    ...
-    tools=[
-        SlackTools(),
-        GoogleCalendarTools(),
-    ],
-)
-```
-
-### Add dependencies
-
-1. Edit `pyproject.toml`
-2. Regenerate requirements: `./scripts/generate_requirements.sh`
-3. Rebuild: `docker compose up -d --build`
-
-### Use a different model provider
-
-1. Add your API key to `.env` (e.g., `ANTHROPIC_API_KEY`)
-2. Update agents to use the new provider:
-
-```python
-from agno.models.anthropic import Claude
-
-model=Claude(id="claude-sonnet-4-5")
-```
-3. Add dependency: `anthropic` in `pyproject.toml`
+Este repo é o projeto prático do módulo **"Agente de IA no WhatsApp com Agno"** do curso **Engenheiro de Produtos IA** da NoCode StartUp.
 
 ---
 
-## Local Development
+## Stack
 
-For development without Docker:
+| Camada | Tecnologia |
+|---|---|
+| Framework de agentes | [Agno](https://docs.agno.com) (Python) |
+| Runtime | AgentOS |
+| Modelo | OpenAI GPT-4.1 |
+| Banco | PostgreSQL + pgvector |
+| Canal | WhatsApp Business API (Meta oficial) |
+| Deploy | [Railway](https://railway.com) (1 clique) |
+| Desenvolvimento | Docker Compose + NGrok |
 
-```sh
-# Install uv
-curl -LsSf https://astral.sh/uv/install.sh | sh
+---
 
-# Setup environment
-./scripts/venv_setup.sh
-source .venv/bin/activate
+## Quickstart — Local
 
-# Start PostgreSQL (required)
-docker compose up -d agentos-db
+Pré-requisitos: Docker Desktop, Git, uma chave OpenAI, um app WhatsApp no Meta for Developers.
 
-# Run the app
-python -m app.main
+```bash
+# 1. Clone e entre na pasta
+git clone https://github.com/dandgsf/agno-whatsapp-starter.git
+cd agno-whatsapp-starter
+
+# 2. Copie e preencha o .env
+cp .env.example .env
+# Edite .env e preencha OPENAI_API_KEY
+# (as vars WHATSAPP_* podem ficar como estão até a etapa do WhatsApp)
+
+# 3. Suba os containers
+docker compose up -d --build
+
+# 4. Confira a saúde
+curl http://localhost:8000/health
+# => {"status":"ok","service":"agentos",...}
 ```
 
-## Environment Variables
+Abra `http://localhost:8000` e converse com o seu agente na UI do AgentOS.
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `OPENAI_API_KEY` | Yes | - | OpenAI API key |
-| `PORT` | No | `8000` | API server port |
-| `DB_HOST` | No | `localhost` | Database host |
-| `DB_PORT` | No | `5432` | Database port |
-| `DB_USER` | No | `ai` | Database user |
-| `DB_PASS` | No | `ai` | Database password |
-| `DB_DATABASE` | No | `ai` | Database name |
-| `RUNTIME_ENV` | No | `prd` | Set to `dev` for auto-reload |
+### Conectar o WhatsApp local (NGrok)
 
-## Learn More
+Quando quiser testar o WhatsApp rodando no seu PC:
 
-- [Agno Documentation](https://docs.agno.com)
-- [AgentOS Documentation](https://docs.agno.com/agent-os/introduction)
-- [Agno Discord](https://agno.com/discord)
+```bash
+# Em outro terminal
+ngrok http 8000
+```
+
+No `.env` preencha todas as `WHATSAPP_*` (ver comentários no `.env.example`) e:
+
+```bash
+WHATSAPP_ENABLED=true
+```
+
+Reinicie: `docker compose restart agentos-api`.
+
+No Meta for Developers → seu App → **WhatsApp → Configuração**:
+
+- Callback URL: `https://<sua-url-ngrok>.ngrok.app/whatsapp/webhook`
+- Verify Token: o mesmo valor de `WHATSAPP_VERIFY_TOKEN` no `.env`
+- Clicar **Verificar e salvar**
+- Em **Campos do webhook → Gerenciar** → marcar `messages` → **Subscribir**
+
+Manda mensagem do número whitelistado → resposta chega.
+
+---
+
+## Quickstart — Produção (Railway)
+
+Clique no botão **Deploy on Railway** no topo deste README.
+
+A Railway provisiona automaticamente:
+- o serviço do app (a partir do `Dockerfile`)
+- um PostgreSQL com pgvector
+
+No painel Railway, nas variáveis de ambiente do serviço do app:
+
+- preencha `OPENAI_API_KEY`
+- preencha as 4 variáveis `WHATSAPP_*` (só depois que quiser ligar o canal)
+- `WAIT_FOR_DB=True`
+- `PRINT_ENV_ON_LOAD=False`
+- para as vars `DB_*`, use **reference variables** do serviço Postgres:
+  ```
+  DB_HOST=${{Postgres.PGHOST}}
+  DB_PORT=${{Postgres.PGPORT}}
+  DB_USER=${{Postgres.PGUSER}}
+  DB_PASS=${{Postgres.PGPASSWORD}}
+  DB_DATABASE=${{Postgres.PGDATABASE}}
+  ```
+
+Gere o domínio público em **Settings → Networking → Generate Domain** (no card do serviço do app, não no card do Postgres).
+
+Aponte o webhook do Meta para `https://<seu-app>.up.railway.app/whatsapp/webhook` e pronto — seu agente atende no WhatsApp **sem depender do seu computador ficar ligado**.
+
+---
+
+## Personalizar o agente
+
+Toda a persona fica em `agents/my_agent.py` na variável `instructions`. Edite, rode `docker compose restart agentos-api` (local) ou faça commit + push (Railway redeploya sozinho) e pronto.
+
+Exemplos do que dá pra fazer ao longo da trilha:
+- trocar o prompt base pra outra persona (atendimento, SDR, tutor, etc.)
+- trocar o modelo (OpenAI → Claude/Gemini, 1 linha)
+- adicionar ferramentas (Google Calendar, CRM, MCP, busca web)
+- ligar knowledge base (RAG) via UI do `os.agno.com`
+
+---
+
+## Estrutura
+
+```
+agno-whatsapp-starter/
+├── agents/
+│   └── my_agent.py        ← sua persona mora aqui
+├── app/
+│   ├── main.py            ← ponto de entrada do AgentOS
+│   ├── interfaces.py      ← habilita WhatsApp condicionalmente
+│   └── config.yaml        ← quick prompts da UI
+├── db/                    ← helpers Postgres/pgvector
+├── scripts/               ← utilitários de build, deploy, lint
+├── tests/                 ← smoke tests
+├── compose.yaml           ← dev local (app + pgvector)
+├── Dockerfile
+├── railway.json           ← config de deploy Railway
+└── .env.example
+```
+
+---
+
+## Troubleshooting rápido
+
+| Sintoma | Fix |
+|---|---|
+| `/health` não responde | Aguardar 30-60s no primeiro boot (pgvector subindo) |
+| Handshake Meta retorna 403 | `WHATSAPP_VERIFY_TOKEN` do `.env` e do Meta precisam ser **idênticos** |
+| `TypeError` no Whatsapp() | Agno 2.5+ lê env vars direto. Não passe kwargs no construtor |
+| WhatsApp sem resposta, webhook OK | Meta → Configuração → **Campos de webhook → Gerenciar** → marcar `messages` → **Subscribir** |
+| Token WhatsApp expirou | Usou o temporário de 24h. Gerar permanente via System User em `business.facebook.com` |
+| Railway não mostra Networking | Você clicou no card do Postgres. Clique no card do app |
+
+---
+
+## Links
+
+- [Agno Docs](https://docs.agno.com)
+- [AgentOS](https://docs.agno.com/agent-os/introduction)
+- [WhatsApp Interface](https://docs.agno.com/agent-os/interfaces/whatsapp/introduction)
+- [Railway deploy](https://docs.agno.com/deploy/templates/railway/deploy)
+
+## Licença
+
+MIT

@@ -1,10 +1,6 @@
 chat:
   quick_prompts:
-    knowledge-agent:
-      - "What is Agno?"
-      - "How do I create my first agent?"
-      - "What documents are in your knowledge base?"
-    mcp-agent:
-      - "What is Agno?"
-      - "What tools do you have access to?"
-      - "What are Learning Machines?"
+    my-agent:
+      - "Oi! Se apresenta rapido pra mim."
+      - "O que voce consegue fazer?"
+      - "Me manda um audio no WhatsApp que eu transcrevo."
