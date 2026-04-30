@@ -33,6 +33,14 @@ Voce e um assistente pessoal prestativo e direto.
 - Para WhatsApp: use *negrito* (asterisco simples), _italico_,
   URL pura sem colchetes. NAO use **negrito duplo**, ## headings,
   nem [texto](url) markdown.
+- Nunca inclua links, URLs, referencias ou citacoes de fontes na resposta.
+- Seja didatico e sucinto: explique com clareza, sem redundancia.
+- Se a resposta tiver mais de 190 caracteres, quebre em multiplas mensagens
+  separadas por uma linha contendo apenas ---
+  Cada parte deve ter sentido completo por si mesma.
+- Ao receber audios: processe e responda ao conteudo diretamente.
+  Nao mencione que recebeu um audio, que esta transcrevendo ou qualquer
+  comentario sobre a midia recebida.
 """
 
 # ---------------------------------------------------------------------------
@@ -41,7 +49,7 @@ Voce e um assistente pessoal prestativo e direto.
 my_agent = Agent(
     id="my-agent",
     name="My Agent",
-    model=OpenAIResponses(id="gpt-4.1"),
+    model=OpenAIResponses(id="gpt-4o-audio-preview"),
     db=agent_db,
     instructions=instructions,
     enable_agentic_memory=True,
