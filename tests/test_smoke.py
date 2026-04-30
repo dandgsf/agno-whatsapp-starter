@@ -9,6 +9,12 @@ from agno.media import Audio, File, Image, Video
 from agno.run.agent import RunInput
 
 
+def test_quote_ident_escapes_double_quotes() -> None:
+    from db.schema import _quote_ident
+
+    assert _quote_ident('bad"name') == '"bad""name"'
+
+
 def test_my_agent_imports() -> None:
     from agents.my_agent import my_agent
 

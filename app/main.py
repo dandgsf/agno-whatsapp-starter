@@ -18,7 +18,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from agents.my_agent import my_agent
 from app.interfaces import build_interfaces
-from db import get_postgres_db
+from db import get_postgres_db, repair_agentos_db_schema
 
 
 def _get_cors_allow_origins() -> list[str]:
@@ -41,12 +41,15 @@ if cors_allow_origins:
 # ---------------------------------------------------------------------------
 # Create AgentOS
 # ---------------------------------------------------------------------------
+agentos_db = get_postgres_db()
+repair_agentos_db_schema(agentos_db)
+
 agent_os = AgentOS(
     name="AgentOS",
     tracing=True,
     scheduler=True,
     base_app=base_app,
-    db=get_postgres_db(),
+    db=agentos_db,
     agents=[my_agent],
     interfaces=build_interfaces(my_agent),
     config=str(Path(__file__).parent / "config.yaml"),
