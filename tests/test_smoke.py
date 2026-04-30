@@ -25,6 +25,16 @@ def test_my_agent_imports() -> None:
     assert my_agent.pre_hooks
 
 
+def test_agent_prompt_keeps_whatsapp_and_grounding_rules() -> None:
+    from agents.my_agent import instructions
+
+    assert "base de informacoes" in instructions
+    assert "tom humano" in instructions
+    assert "190 caracteres" in instructions
+    assert "linha contendo apenas:\n---" in instructions
+    assert "Nao invente" in instructions
+
+
 def test_interfaces_disabled_by_default() -> None:
     # Limpa WHATSAPP_ENABLED pra garantir default.
     os.environ.pop("WHATSAPP_ENABLED", None)
