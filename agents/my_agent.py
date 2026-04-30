@@ -49,7 +49,7 @@ Voce e um assistente pessoal prestativo e direto.
 my_agent = Agent(
     id="my-agent",
     name="My Agent",
-    model=OpenAIResponses(id="gpt-4o-realtime-preview-2025-06-03"),
+    model=OpenAIResponses(id="gpt-5.4-2026-03-05"),
     db=agent_db,
     instructions=instructions,
     enable_agentic_memory=True,
