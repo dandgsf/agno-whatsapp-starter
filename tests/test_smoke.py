@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 import os
+from unittest.mock import patch
+
+from agno.media import Audio, File, Image, Video
+from agno.run.agent import RunInput
 
 
 def test_my_agent_imports() -> None:
@@ -10,6 +14,9 @@ def test_my_agent_imports() -> None:
 
     assert my_agent.id == "my-agent"
     assert my_agent.name == "My Agent"
+    assert my_agent.model is not None
+    assert my_agent.model.id == os.getenv("OPENAI_MODEL", "gpt-4o")
+    assert my_agent.pre_hooks
 
 
 def test_interfaces_disabled_by_default() -> None:
@@ -22,3 +29,38 @@ def test_interfaces_disabled_by_default() -> None:
         pass
 
     assert build_interfaces(_FakeAgent()) == []
+
+
+def test_audio_is_transcribed_into_input_context() -> None:
+    from agents.hooks import prepare_multimodal_input
+
+    run_input = RunInput(input_content="", audios=[Audio(content=b"fake", mime_type="audio/ogg")])
+
+    with patch("agents.hooks.media._transcribe_audio", return_value="Oi, quero remarcar minha aula."):
+        prepare_multimodal_input(run_input)
+
+    assert run_input.audios is None
+    assert "Oi, quero remarcar minha aula." in str(run_input.input_content)
+    assert "sem dizer que transcreveu" in str(run_input.input_content)
+
+
+def test_default_prompts_for_media_without_caption() -> None:
+    from agents.hooks import prepare_multimodal_input
+
+    image_input = RunInput(input_content="", images=[Image(content=b"img", mime_type="image/png")])
+    prepare_multimodal_input(image_input)
+    assert image_input.input_content == "Analise a imagem enviada e responda de forma util em PT-BR."
+
+    file_input = RunInput(input_content="", files=[File(content=b"pdf", mime_type="application/pdf")])
+    prepare_multimodal_input(file_input)
+    assert file_input.input_content == "Analise o documento enviado e resuma os pontos principais em PT-BR."
+
+
+def test_video_gets_clear_fallback_context() -> None:
+    from agents.hooks import prepare_multimodal_input
+
+    run_input = RunInput(input_content="", videos=[Video(content=b"video", mime_type="video/mp4")])
+    prepare_multimodal_input(run_input)
+
+    assert run_input.videos is None
+    assert "nao processa video nativamente" in str(run_input.input_content)

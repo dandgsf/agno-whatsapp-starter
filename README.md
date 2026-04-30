@@ -1,6 +1,6 @@
 # agno-whatsapp-starter
 
-Template plug-and-play pra subir **um agente de IA que atende no WhatsApp Meta oficial**, com suporte a texto, áudio, imagem e documentos.
+Template plug-and-play pra subir **um agente de IA que atende no WhatsApp Meta oficial**, com suporte a texto, imagem, documentos e áudio transcrito automaticamente.
 
 [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy?template=https://github.com/dandgsf/agno-whatsapp-starter)
 
@@ -14,7 +14,7 @@ Este repo é o projeto prático do módulo **"Agente de IA no WhatsApp com Agno"
 |---|---|
 | Framework de agentes | [Agno](https://docs.agno.com) (Python) |
 | Runtime | AgentOS |
-| Modelo | OpenAI GPT-4.1 |
+| Modelo | OpenAI GPT-4o + GPT-4o mini Transcribe |
 | Banco | PostgreSQL + pgvector |
 | Canal | WhatsApp Business API (Meta oficial) |
 | Deploy | [Railway](https://railway.com) (1 clique) |
@@ -85,6 +85,8 @@ A Railway provisiona automaticamente:
 No painel Railway, nas variáveis de ambiente do serviço do app:
 
 - preencha `OPENAI_API_KEY`
+- opcionalmente ajuste `OPENAI_MODEL` (`gpt-4o` por padrão)
+- opcionalmente ajuste `OPENAI_AUDIO_TRANSCRIPTION_MODEL` (`gpt-4o-mini-transcribe` por padrão)
 - preencha as 4 variáveis `WHATSAPP_*` (só depois que quiser ligar o canal)
 - `WAIT_FOR_DB=True`
 - `PRINT_ENV_ON_LOAD=False`
@@ -112,6 +114,15 @@ Exemplos do que dá pra fazer ao longo da trilha:
 - trocar o modelo (OpenAI → Claude/Gemini, 1 linha)
 - adicionar ferramentas (Google Calendar, CRM, MCP, busca web)
 - ligar knowledge base (RAG) via UI do `os.agno.com`
+
+### Multimodal na aula
+
+- Texto: nativo.
+- Imagem: nativo pelo GPT-4o.
+- Documento: enviado como arquivo para o modelo quando o formato/tamanho for aceito.
+- Áudio: o WhatsApp entrega o arquivo, o backend transcreve com `OPENAI_AUDIO_TRANSCRIPTION_MODEL` e o agente responde ao texto transcrito.
+
+Vídeo não faz parte do escopo deste starter. Se alguém enviar vídeo por engano, o bot responde com fallback curto em vez de falhar silenciosamente.
 
 ---
 

@@ -9,15 +9,19 @@ Rodar standalone:
     python -m agents.my_agent
 """
 
+from os import getenv
+
 from agno.agent import Agent
 from agno.models.openai import OpenAIResponses
 
+from agents.hooks import prepare_multimodal_input
 from db import get_postgres_db
 
 # ---------------------------------------------------------------------------
 # Setup
 # ---------------------------------------------------------------------------
 agent_db = get_postgres_db()
+model_id = getenv("OPENAI_MODEL", "gpt-4o")
 
 # ---------------------------------------------------------------------------
 # Persona
@@ -30,6 +34,8 @@ Voce e um assistente pessoal prestativo e direto.
 - Use linguagem informal mas profissional.
 - Evite jargao tecnico sem explicacao.
 - Se nao souber algo, admita em vez de inventar.
+- Quando receber imagem: analise o que aparece e responda ao pedido do usuario.
+- Quando receber documento: resuma ou responda sobre o conteudo enviado.
 - Para WhatsApp: use *negrito* (asterisco simples), _italico_,
   URL pura sem colchetes. NAO use **negrito duplo**, ## headings,
   nem [texto](url) markdown.
@@ -39,8 +45,9 @@ Voce e um assistente pessoal prestativo e direto.
   separadas por uma linha contendo apenas ---
   Cada parte deve ter sentido completo por si mesma.
 - Ao receber audios: processe e responda ao conteudo diretamente.
-  Nao mencione que recebeu um audio, que esta transcrevendo ou qualquer
-  comentario sobre a midia recebida.
+  O audio e transcrito internamente antes de chegar aqui. Nao mencione
+  que recebeu um audio, que esta transcrevendo ou qualquer comentario
+  sobre a midia recebida, exceto se a transcricao falhar.
 """
 
 # ---------------------------------------------------------------------------
@@ -49,7 +56,7 @@ Voce e um assistente pessoal prestativo e direto.
 my_agent = Agent(
     id="my-agent",
     name="My Agent",
-    model=OpenAIResponses(id="gpt-5.4-2026-03-05"),
+    model=OpenAIResponses(id=model_id),
     db=agent_db,
     instructions=instructions,
     enable_agentic_memory=True,
@@ -58,6 +65,7 @@ my_agent = Agent(
     read_chat_history=True,
     num_history_runs=5,
     markdown=True,
+    pre_hooks=[prepare_multimodal_input],
 )
 
 
