@@ -21,7 +21,7 @@ def test_my_agent_imports() -> None:
     assert my_agent.id == "my-agent"
     assert my_agent.name == "My Agent"
     assert my_agent.model is not None
-    assert my_agent.model.id == os.getenv("OPENAI_MODEL", "gpt-4o")
+    assert my_agent.model.id == os.getenv("OPENAI_MODEL", "gpt-5-mini")
     assert my_agent.pre_hooks
 
 

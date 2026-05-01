@@ -85,7 +85,7 @@ A Railway provisiona automaticamente:
 No painel Railway, nas variáveis de ambiente do serviço do app:
 
 - preencha `OPENAI_API_KEY`
-- opcionalmente ajuste `OPENAI_MODEL` (`gpt-4o` por padrão)
+- opcionalmente ajuste `OPENAI_MODEL` (`gpt-5-mini` por padrão)
 - opcionalmente ajuste `OPENAI_AUDIO_TRANSCRIPTION_MODEL` (`gpt-4o-mini-transcribe` por padrão)
 - preencha as 4 variáveis `WHATSAPP_*` (só depois que quiser ligar o canal)
 - `WAIT_FOR_DB=True`

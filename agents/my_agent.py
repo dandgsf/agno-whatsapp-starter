@@ -23,7 +23,7 @@ from db import get_postgres_db
 # Setup
 # ---------------------------------------------------------------------------
 agent_db = get_postgres_db()
-model_id = getenv("OPENAI_MODEL", "gpt-4o")
+model_id = getenv("OPENAI_MODEL", "gpt-5-mini")
 
 # ---------------------------------------------------------------------------
 # Agent
