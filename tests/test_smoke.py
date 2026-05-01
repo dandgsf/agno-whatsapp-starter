@@ -115,6 +115,13 @@ def test_interfaces_disabled_by_default() -> None:
     assert build_interfaces(_FakeAgent()) == []
 
 
+def test_whatsapp_delimited_messages_are_split() -> None:
+    from app.interfaces import _split_whatsapp_delimited_message
+
+    assert _split_whatsapp_delimited_message("um\n---\ndois") == ["um", "dois"]
+    assert _split_whatsapp_delimited_message("sem delimitador") == ["sem delimitador"]
+
+
 def test_audio_is_transcribed_into_input_context() -> None:
     from agents.hooks import prepare_multimodal_input
 
