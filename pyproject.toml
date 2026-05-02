@@ -27,7 +27,7 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["agents*", "db*", "app*"]
+include = ["agents*", "db*", "app*", "utils*"]
 
 [tool.ruff]
 line-length = 120

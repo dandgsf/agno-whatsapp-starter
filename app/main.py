@@ -16,6 +16,10 @@ from agno.os import AgentOS
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from utils.validate_envs import validate_envs
+
+validate_envs()
+
 from agents.my_agent import my_agent
 from app.interfaces import build_interfaces
 from db import get_postgres_db, repair_agentos_db_schema
