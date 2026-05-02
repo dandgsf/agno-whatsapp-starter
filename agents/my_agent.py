@@ -39,10 +39,15 @@ my_agent = Agent(
     add_history_to_context=True,
     read_chat_history=True,
     num_history_runs=5,
+    tool_call_limit=5,
     markdown=True,
     pre_hooks=[prepare_multimodal_input, ContentSafetyGuardrail()],
     post_hooks=[enforce_safe_whatsapp_output],
 )
+
+# Compat: Agno 2.6.x nao aceita `max_iterations` no construtor, mas o atributo
+# e mantido para alinhamento com configuracoes antigas do projeto.
+my_agent.max_iterations = 5
 
 
 if __name__ == "__main__":
