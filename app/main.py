@@ -20,9 +20,9 @@ from utils.validate_envs import validate_envs
 
 validate_envs()
 
-from agents.my_agent import my_agent
-from app.interfaces import build_interfaces
-from db import get_postgres_db, repair_agentos_db_schema
+from agents.my_agent import my_agent  # noqa: E402
+from app.interfaces import build_interfaces  # noqa: E402
+from db import get_postgres_db, repair_agentos_db_schema  # noqa: E402
 
 
 def _get_cors_allow_origins() -> list[str]:

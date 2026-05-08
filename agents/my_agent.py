@@ -47,7 +47,7 @@ my_agent = Agent(
 
 # Compat: Agno 2.6.x nao aceita `max_iterations` no construtor, mas o atributo
 # e mantido para alinhamento com configuracoes antigas do projeto.
-my_agent.max_iterations = 5
+setattr(my_agent, "max_iterations", 5)
 
 
 if __name__ == "__main__":

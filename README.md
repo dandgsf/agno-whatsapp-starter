@@ -90,7 +90,11 @@ No painel Railway, nas variáveis de ambiente do serviço do app:
 - preencha as 4 variáveis `WHATSAPP_*` (só depois que quiser ligar o canal)
 - `WAIT_FOR_DB=True`
 - `PRINT_ENV_ON_LOAD=False`
-- para as vars `DB_*`, use **reference variables** do serviço Postgres:
+- para o banco, prefira uma única reference variable do serviço Postgres:
+  ```
+  DATABASE_URL=${{Postgres.DATABASE_URL}}
+  ```
+- alternativa: use as vars `DB_*` via **reference variables** do serviço Postgres:
   ```
   DB_HOST=${{Postgres.PGHOST}}
   DB_PORT=${{Postgres.PGPORT}}
@@ -152,6 +156,8 @@ agno-whatsapp-starter/
 | Sintoma | Fix |
 |---|---|
 | `/health` não responde | Aguardar 30-60s no primeiro boot (pgvector subindo) |
+| `openai_api_key Field required` no Railway | Defina `OPENAI_API_KEY` nas variáveis do serviço do app, não no serviço Postgres |
+| Erro de conexão com `localhost:5432` no Railway | Defina `DATABASE_URL=${{Postgres.DATABASE_URL}}` ou as `DB_*` como reference variables |
 | Handshake Meta retorna 403 | `WHATSAPP_VERIFY_TOKEN` do `.env` e do Meta precisam ser **idênticos** |
 | `TypeError` no Whatsapp() | Agno 2.5+ lê env vars direto. Não passe kwargs no construtor |
 | WhatsApp sem resposta, webhook OK | Meta → Configuração → **Campos de webhook → Gerenciar** → marcar `messages` → **Subscribir** |

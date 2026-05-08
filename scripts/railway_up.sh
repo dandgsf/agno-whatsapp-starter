@@ -69,6 +69,7 @@ echo ""
 echo -e "${BOLD}Creating application service...${NC}"
 echo ""
 railway add --service agent-os \
+    --variables 'DATABASE_URL=${{pgvector.DATABASE_URL}}' \
     --variables 'DB_USER=${{pgvector.PGUSER}}' \
     --variables 'DB_PASS=${{pgvector.PGPASSWORD}}' \
     --variables 'DB_HOST=${{pgvector.PGHOST}}' \

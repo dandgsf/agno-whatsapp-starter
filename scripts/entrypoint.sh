@@ -31,10 +31,30 @@ if [[ "$PRINT_ENV_ON_LOAD" = true || "$PRINT_ENV_ON_LOAD" = True ]]; then
 fi
 
 if [[ "$WAIT_FOR_DB" = true || "$WAIT_FOR_DB" = True ]]; then
-    echo -e "    ${DIM}Waiting for database at ${DB_HOST}:${DB_PORT}...${NC}"
-    dockerize -wait tcp://$DB_HOST:$DB_PORT -timeout 300s
-    echo -e "    ${BOLD}Database ready.${NC}"
-    echo ""
+    if [[ -n "$DB_HOST" ]]; then
+        DB_WAIT_TARGET="${DB_HOST}:${DB_PORT:-5432}"
+    elif [[ -n "$DATABASE_URL" ]]; then
+        DB_WAIT_TARGET="$(python - <<'PY'
+from os import getenv
+from urllib.parse import urlparse
+
+parsed = urlparse(getenv("DATABASE_URL", ""))
+if parsed.hostname:
+    print(f"{parsed.hostname}:{parsed.port or 5432}")
+PY
+)"
+    else
+        DB_WAIT_TARGET=""
+    fi
+
+    if [[ -n "$DB_WAIT_TARGET" ]]; then
+        echo -e "    ${DIM}Waiting for database at ${DB_WAIT_TARGET}...${NC}"
+        dockerize -wait tcp://$DB_WAIT_TARGET -timeout 300s
+        echo -e "    ${BOLD}Database ready.${NC}"
+        echo ""
+    else
+        echo -e "    ${DIM}WAIT_FOR_DB=True, but no DB_HOST or DATABASE_URL was provided. Skipping database wait.${NC}"
+    fi
 fi
 
 PORT_VALUE="${PORT:-8000}"
