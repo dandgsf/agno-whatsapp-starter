@@ -119,7 +119,7 @@ def _prepare_audio(run_input: RunInput) -> None:
             transcript = _transcribe_audio(audio, index)
         except Exception as exc:  # noqa: BLE001
             failures += 1
-            log_warning(f"audio transcription failed for audio #{index}: {exc}")
+            log_warning(f"audio transcription failed for audio #{index}: {type(exc).__name__}", exc_info=False)
             continue
 
         audio.transcript = transcript

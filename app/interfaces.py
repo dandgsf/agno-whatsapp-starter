@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import logging
 from os import getenv
 from typing import Any
 
 from agno.os.interfaces.base import BaseInterface
+from agno.os.interfaces.whatsapp import helpers as whatsapp_helpers
 from agno.os.interfaces.whatsapp import router as whatsapp_router
 from agno.os.interfaces.whatsapp.helpers import send_whatsapp_message_async as _send_whatsapp_message_async
 from agno.os.interfaces.whatsapp import Whatsapp
@@ -36,7 +38,23 @@ async def _send_chunked_whatsapp_message_async(
     await _send_whatsapp_message_async(recipient, message, config, italics=italics)
 
 
-def _patch_whatsapp_chunk_sender() -> None:
+def _whatsapp_info(msg: Any, *args: Any, **kwargs: Any) -> None:
+    logging.getLogger(__name__).info("WhatsApp message processed")
+
+
+def _whatsapp_warning(_message: Any) -> None:
+    logging.getLogger(__name__).warning("WhatsApp webhook or media warning")
+
+
+def _whatsapp_error(_message: Any) -> None:
+    logging.getLogger(__name__).error("WhatsApp request failed")
+
+
+def _configure_whatsapp_adapter() -> None:
+    # Agno 2.6 logs message bodies, phone numbers and provider error responses in these two modules.
+    whatsapp_helpers.log_info = whatsapp_router.log_info = _whatsapp_info
+    whatsapp_helpers.log_warning = whatsapp_router.log_warning = _whatsapp_warning
+    whatsapp_helpers.log_error = whatsapp_router.log_error = _whatsapp_error
     whatsapp_router.send_whatsapp_message_async = _send_chunked_whatsapp_message_async  # type: ignore[assignment]
 
 
@@ -74,7 +92,7 @@ def build_interfaces(agent: Any) -> list[BaseInterface]:
             f"WHATSAPP_ENABLED=true but these WhatsApp settings are missing or still placeholders: {missing_vars}"
         )
 
-    _patch_whatsapp_chunk_sender()
+    _configure_whatsapp_adapter()
 
     return [
         Whatsapp(

@@ -5,8 +5,14 @@ from __future__ import annotations
 import os
 from unittest.mock import patch
 
+import pytest
 from agno.media import Audio, File, Image, Video
 from agno.run.agent import RunInput, RunOutput
+
+
+@pytest.fixture(autouse=True)
+def local_database(monkeypatch) -> None:
+    monkeypatch.setenv("DB_PASS", "local-test-only")
 
 
 def test_database_url_is_normalized_for_psycopg(monkeypatch) -> None:

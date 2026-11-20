@@ -61,4 +61,4 @@ def repair_agentos_db_schema(db: PostgresDb) -> None:
     try:
         ensure_approvals_run_status_column(db)
     except Exception as exc:  # noqa: BLE001
-        log_warning(f"AgentOS database schema repair skipped: {exc}")
+        log_warning(f"AgentOS database schema repair skipped: {type(exc).__name__}", exc_info=False)

@@ -1,4 +1,5 @@
 #!/bin/bash
+set +x
 
 ############################################################################
 #
@@ -24,17 +25,11 @@ cat << 'BANNER'
 BANNER
 echo -e "${NC}"
 
-if [[ "$PRINT_ENV_ON_LOAD" = true || "$PRINT_ENV_ON_LOAD" = True ]]; then
-    echo -e "    ${DIM}Environment:${NC}"
-    printenv | sed 's/^/    /'
-    echo ""
-fi
-
 if [[ "$WAIT_FOR_DB" = true || "$WAIT_FOR_DB" = True ]]; then
     if [[ -n "$DB_HOST" ]]; then
         DB_WAIT_TARGET="${DB_HOST}:${DB_PORT:-5432}"
     elif [[ -n "$DATABASE_URL" ]]; then
-        DB_WAIT_TARGET="$(python - <<'PY'
+        DB_WAIT_TARGET="$(python - 2>/dev/null <<'PY'
 from os import getenv
 from urllib.parse import urlparse
 
@@ -42,14 +37,17 @@ parsed = urlparse(getenv("DATABASE_URL", ""))
 if parsed.hostname:
     print(f"{parsed.hostname}:{parsed.port or 5432}")
 PY
-)"
+)" || { echo "Invalid database configuration." >&2; exit 1; }
     else
         DB_WAIT_TARGET=""
     fi
 
     if [[ -n "$DB_WAIT_TARGET" ]]; then
-        echo -e "    ${DIM}Waiting for database at ${DB_WAIT_TARGET}...${NC}"
-        dockerize -wait tcp://$DB_WAIT_TARGET -timeout 300s
+        echo -e "    ${DIM}Waiting for database...${NC}"
+        if ! dockerize -wait "tcp://$DB_WAIT_TARGET" -timeout 300s >/dev/null 2>&1; then
+            echo "Database unavailable. Check the connection settings." >&2
+            exit 1
+        fi
         echo -e "    ${BOLD}Database ready.${NC}"
         echo ""
     else
@@ -70,11 +68,9 @@ case "$1" in
         echo -e "    ${DIM}Mode: serve${NC}"
         echo -e "    ${BOLD}Starting AgentOS on 0.0.0.0:${PORT_VALUE}.${NC}"
         echo ""
-        exec uvicorn app.main:app --host 0.0.0.0 --port "$PORT_VALUE"
+        exec uvicorn app.main:app --host 0.0.0.0 --port "$PORT_VALUE" --no-access-log
         ;;
     *)
-        echo -e "    ${DIM}> $@${NC}"
-        echo ""
         exec "$@"
         ;;
 esac

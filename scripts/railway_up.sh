@@ -13,6 +13,7 @@
 #
 ############################################################################
 
+set +x
 set -e
 
 # Colors
@@ -77,8 +78,9 @@ railway add --service agent-os \
     --variables 'DB_DATABASE=${{pgvector.PGDATABASE}}' \
     --variables "DB_DRIVER=postgresql+psycopg" \
     --variables "WAIT_FOR_DB=True" \
-    --variables "OPENAI_API_KEY=${OPENAI_API_KEY}" \
     --variables "PORT=8000"
+
+printf '%s' "$OPENAI_API_KEY" | railway variable set OPENAI_API_KEY --stdin --service agent-os --skip-deploys
 
 echo ""
 echo -e "${BOLD}Deploying application...${NC}"

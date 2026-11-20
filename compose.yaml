@@ -1,16 +1,17 @@
 services:
   agentos-db:
     image: agnohq/pgvector:18
+    entrypoint: ["/bin/sh", "/usr/local/bin/check-postgres-password"]
+    command: ["postgres"]
     container_name: agentos-db
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${DB_USER:-ai}
-      POSTGRES_PASSWORD: ${DB_PASS:-ai}
+      POSTGRES_PASSWORD: ${DB_PASS:?Defina DB_PASS no .env}
       POSTGRES_DB: ${DB_DATABASE:-ai}
     volumes:
       - pgdata:/var/lib/postgresql
-    ports:
-      - "5432:5432"
+      - ./scripts/postgres-entrypoint.sh:/usr/local/bin/check-postgres-password:ro
     networks:
       - agentos
 
@@ -20,7 +21,7 @@ services:
       dockerfile: Dockerfile
     image: ${IMAGE_NAME:-agno-agentos}:${IMAGE_TAG:-latest}
     container_name: agentos-api
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --no-access-log
     restart: unless-stopped
     ports:
       - "8000:8000"
@@ -29,16 +30,14 @@ services:
       - .:/app
     environment:
       - RUNTIME_ENV=dev
-      - AGNO_DEBUG=True
       - PYTHONPATH=/app
       # Database
       - DB_HOST=agentos-db
       - DB_PORT=5432
       - DB_USER=${DB_USER:-ai}
-      - DB_PASS=${DB_PASS:-ai}
+      - DB_PASS=${DB_PASS:?Defina DB_PASS no .env}
       - DB_DATABASE=${DB_DATABASE:-ai}
       - WAIT_FOR_DB=True
-      - PRINT_ENV_ON_LOAD=${PRINT_ENV_ON_LOAD:-False}
       # API keys
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - OPENAI_MODEL=${OPENAI_MODEL:-gpt-5-mini}
