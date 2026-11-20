@@ -36,6 +36,8 @@ venv/
 env/
 ENV/
 .env
+.env.*
+!.env.example
 .envrc
 
 # =========================

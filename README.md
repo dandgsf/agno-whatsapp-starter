@@ -33,7 +33,7 @@ cd agno-whatsapp-starter
 
 # 2. Copie e preencha o .env
 cp .env.example .env
-# Edite .env e preencha OPENAI_API_KEY
+# Edite .env, preencha OPENAI_API_KEY e defina uma senha exclusiva em DB_PASS.
 # (as vars WHATSAPP_* podem ficar como estão até a etapa do WhatsApp)
 
 # 3. Suba os containers
@@ -45,6 +45,18 @@ curl http://localhost:8000/health
 ```
 
 Abra `http://localhost:8000` e converse com o seu agente na UI do AgentOS.
+
+### Atualizar um banco local existente
+
+O PostgreSQL aceita conexões pela rede interna do Compose. Se você já usou a senha padrão, altere a senha do usuário no banco existente antes de atualizar o `.env`. Com o contêiner atual em execução, abra o cliente:
+
+```bash
+docker compose exec agentos-db sh -c 'exec psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"'
+```
+
+Digite `\password`, informe a nova senha nos prompts e saia com `\q`. Salve a mesma senha em `DB_PASS` no `.env` e execute `docker compose up -d --build`. Isso preserva o volume. Alterar só o arquivo não atualiza a senha de um banco já inicializado.
+
+Se você habilitou a impressão do ambiente em uma versão anterior, trate as credenciais presentes nesses logs como expostas e substitua cada uma no respectivo serviço.
 
 ### Conectar o WhatsApp local (NGrok)
 
@@ -89,7 +101,6 @@ No painel Railway, nas variáveis de ambiente do serviço do app:
 - opcionalmente ajuste `OPENAI_AUDIO_TRANSCRIPTION_MODEL` (`gpt-4o-mini-transcribe` por padrão)
 - preencha as 4 variáveis `WHATSAPP_*` (só depois que quiser ligar o canal)
 - `WAIT_FOR_DB=True`
-- `PRINT_ENV_ON_LOAD=False`
 - para o banco, prefira uma única reference variable do serviço Postgres:
   ```
   DATABASE_URL=${{Postgres.DATABASE_URL}}

@@ -12,12 +12,48 @@ from os import getenv
 
 from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy.engine import make_url
+from sqlalchemy.exc import ArgumentError
 
 _PLACEHOLDER_PREFIXES = ("your-", "your ")
 _LOCAL_DB_HOSTS = ("", "localhost", "127.0.0.1", "db")
 
 
-class AppSettings(BaseSettings):
+class DatabaseSettings(BaseSettings):
+    """Database configuration shared by the app and standalone database imports."""
+
+    db_driver: str = "postgresql+psycopg"
+    database_url: str = ""
+    db_host: str = "localhost"
+    db_port: str = "5432"
+    db_user: str = "ai"
+    db_pass: str = ""
+    db_database: str = "ai"
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",
+        hide_input_in_errors=True,
+    )
+
+    @model_validator(mode="after")
+    def _validate_database_password(self) -> "DatabaseSettings":
+        if self.database_url.strip():
+            try:
+                url = make_url(self.database_url.strip())
+            except (ArgumentError, ValueError):
+                raise ValueError("Invalid DATABASE_URL.") from None
+            password = url.query.get("password", url.password)
+            if password is None or (isinstance(password, str) and password.strip() and password != "ai"):
+                return self
+        elif self.db_pass.strip() and self.db_pass != "ai":
+            return self
+        raise ValueError("Set a unique PostgreSQL password in DB_PASS or DATABASE_URL.")
+
+
+class AppSettings(DatabaseSettings):
     """Runtime settings loaded from environment variables and `.env`."""
 
     openai_api_key: str = ""
@@ -25,26 +61,12 @@ class AppSettings(BaseSettings):
     openai_audio_transcription_model: str = "gpt-4o-mini-transcribe"
     openai_audio_language: str = "pt"
 
-    database_url: str = ""
-    db_host: str = "localhost"
-    db_port: str = "5432"
-    db_user: str = "ai"
-    db_pass: str = "ai"
-    db_database: str = "ai"
-
     whatsapp_enabled: bool = False
     whatsapp_access_token: str = ""
     whatsapp_phone_number_id: str = ""
     whatsapp_verify_token: str = ""
     whatsapp_app_secret: str = ""
     whatsapp_skip_signature_validation: bool = False
-
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        case_sensitive=False,
-        extra="ignore",
-    )
 
     @staticmethod
     def _is_placeholder(value: str) -> bool:

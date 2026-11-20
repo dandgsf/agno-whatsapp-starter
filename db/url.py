@@ -5,8 +5,9 @@ Database URL
 Build database connection URL from environment variables.
 """
 
-from os import getenv
 from urllib.parse import quote
+
+from utils.validate_envs import DatabaseSettings
 
 
 def normalize_db_url(url: str) -> str:
@@ -24,18 +25,13 @@ def normalize_db_url(url: str) -> str:
 
 def build_db_url() -> str:
     """Build database URL from environment variables."""
-    database_url = getenv("DATABASE_URL")
-    if database_url:
-        return normalize_db_url(database_url)
+    settings = DatabaseSettings()
+    if settings.database_url.strip():
+        return normalize_db_url(settings.database_url)
 
-    driver = getenv("DB_DRIVER", "postgresql+psycopg")
-    user = getenv("DB_USER", "ai")
-    password = quote(getenv("DB_PASS", "ai"), safe="")
-    host = getenv("DB_HOST", "localhost")
-    port = getenv("DB_PORT", "5432")
-    database = getenv("DB_DATABASE", "ai")
-
-    return f"{driver}://{user}:{password}@{host}:{port}/{database}"
+    user = quote(settings.db_user, safe="")
+    password = quote(settings.db_pass, safe="")
+    return f"{settings.db_driver}://{user}:{password}@{settings.db_host}:{settings.db_port}/{settings.db_database}"
 
 
 db_url = build_db_url()

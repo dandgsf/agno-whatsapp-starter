@@ -77,6 +77,7 @@ my_agent = Agent(
 ```bash
 # Setup local
 cp .env.example .env
+# Preencha OPENAI_API_KEY e defina uma senha exclusiva em DB_PASS no .env.
 docker compose up -d --build
 
 # Logs
@@ -97,7 +98,6 @@ Ver `.env.example` pra lista comentada. Obrigatórias em produção:
 - `OPENAI_API_KEY`
 - `DB_*` (na Railway, via reference vars do serviço Postgres)
 - `WHATSAPP_ENABLED`, `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_APP_SECRET` quando ligar o canal
-- `PRINT_ENV_ON_LOAD=False` (sempre)
 
 ## Adicionar features (trilha de evolução)
 

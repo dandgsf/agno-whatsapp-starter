@@ -17,6 +17,8 @@ docs
 
 # Ignore .env files
 .env
+.env.*
+!.env.example
 .envrc
 
 # ignore virtualenvs
