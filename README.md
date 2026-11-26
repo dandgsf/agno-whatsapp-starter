@@ -183,6 +183,7 @@ agno-whatsapp-starter/
 - [AgentOS](https://docs.agno.com/agent-os/introduction)
 - [WhatsApp Interface](https://docs.agno.com/agent-os/interfaces/whatsapp/introduction)
 - [Railway deploy](https://docs.agno.com/deploy/templates/railway/deploy)
+- [Recursos e benefícios opcionais para explorar agentes e cobranças](https://github.com/dandgsf/pipeflow-crm/blob/main/docs/aulas/beneficios.md)
 
 ## Licença
 
